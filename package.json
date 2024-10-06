@@ -1,0 +1,21 @@
+{
+  "name": "cross-chain",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node --esm src/placeorder.ts"
+  },
+  "private": true,
+  "dependencies": {
+    "@1inch/cross-chain-sdk": "latest",
+    "ethers": "^6.13.3",
+    "web3": "^4.13.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2"
+  }
+}
