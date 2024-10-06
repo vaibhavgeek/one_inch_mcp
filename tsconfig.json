@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",                          // Enables top-level await and modern JS features
+    "module": "ESNext",                          // Supports ESM
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
