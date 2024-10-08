@@ -1,16 +1,18 @@
 {
+  "extends": "@1inch/tsconfig",
+  "include": ["src"],
   "compilerOptions": {
-    "target": "ES2022",                          // Enables top-level await and modern JS features
-    "module": "ESNext",                          // Supports ESM
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "typeRoots": [
+      "./src/types-overrides",
+      "./node_modules/@types"
+    ],
     "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true
+    "baseUrl": "./",
+    "lib": [
+      "ES2021"
+    ],
+    "target": "ES2021"
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules"]
 }
