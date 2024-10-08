@@ -1,23 +1,20 @@
-import {
-    SDK,
-    HashLock,
-    PrivateKeyProviderConnector,
-    NetworkEnum,
-    QuoteParams
-} from "@1inch/cross-chain-sdk";
-import Web3 from 'web3';
+import { SDK, HashLock, PrivateKeyProviderConnector, NetworkEnum, QuoteParams } from "@1inch/cross-chain-sdk";
+import env from 'dotenv';
+const process = env.config().parsed;
+
+import { Web3, InvalidInputError } from 'web3';
 import { solidityPackedKeccak256 } from 'ethers';
 import {randomBytes} from 'ethers'
-import {uint8ArrayToHex} from '@1inch/byte-utils'
 
 export function getRandomBytes32(): string {
-    return uint8ArrayToHex(randomBytes(32))
+    // for some reason the cross-chain-sdk expects a leading 0x and can't handle a 32 byte long hex string
+    return '0x' + Buffer.from(randomBytes(32)).toString('hex')
 }
 
-const makerPrivateKey = process.env.WALLET_KEY
-const makerAddress = process.env.WALLET_ADDRESS
+const makerPrivateKey = process?.WALLET_KEY
+const makerAddress = process?.WALLET_ADDRESS
 
-const nodeUrl = process.env.RPC_URL_ETHEREUM
+const nodeUrl = process?.RPC_URL_ETHEREUM // suggested for ethereum https://eth.llamarpc.com
 
 
 // Validate environment variables
@@ -25,14 +22,15 @@ if (!makerPrivateKey || !makerAddress || !nodeUrl) {
     throw new Error("Missing required environment variables. Please check your .env file.");
 }
 
+
 const blockchainProvider = new PrivateKeyProviderConnector(
     makerPrivateKey,
-    new Web3(nodeUrl) as any,
+    await new Web3(nodeUrl) as any
 )
 
 const sdk = new SDK({
-    url: 'https://api.1inch.dev/fusion',
-    authKey: 'your-auth-key',
+    url: 'https://api.1inch.dev/fusion-plus',
+    authKey: process?.DEV_PORTAL_KEY,
     blockchainProvider
 })
 
