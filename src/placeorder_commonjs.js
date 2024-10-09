@@ -60,11 +60,7 @@ sdk.getQuote(params).then(quote => {
     sdk.placeOrder(quote, {
         walletAddress: makerAddress,
         hashLock,
-        secretHashes,
-        fee: {
-            takingFeeBps: 100,
-            takingFeeReceiver: '0x0000000000000000000000000000000000000000'
-        }
+        secretHashes
     }).then(console.log).catch(console.error);
 }).catch(console.error);
 
