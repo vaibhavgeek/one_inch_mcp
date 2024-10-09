@@ -61,7 +61,37 @@ sdk.getQuote(params).then(quote => {
         walletAddress: makerAddress,
         hashLock,
         secretHashes
-    }).then(console.log).catch((error) => {
+    }).then(quoteResponse => {
+
+        console.log(`secretHashes: ${JSON.stringify(secretHashes, null, 2)}`);
+
+        const orderHash = quoteResponse.orderHash;
+
+        setInterval(() => {
+            sdk.getReadyToAcceptSecretFills(orderHash)
+                .then((fillsObject) => {
+                    console.log(`fills length: ${fillsObject.fills.length}`);
+                    if (fillsObject.fills.length > 0) {
+                        // For each secret, call submitSecret
+                        fillsObject.fills.forEach(fill => {
+                            console.log(`fill content: ${JSON.stringify(fill, null, 2)}`);
+                            console.log(`Submitting secret ${secretHashes[fill.idx]} for order ${orderHash}`);
+                            sdk.submitSecret(orderHash, secretHashes[fill.idx])
+                                .then(() => {
+                                    console.log(`Secret submitted: ${JSON.stringify(secretHashes[fill.idx], null, 2)}`);
+//                                    clearInterval(intervalId);
+                                })
+                                .catch((error) => {
+                                    console.error(`Error submitting secret: ${JSON.stringify(error, null, 2)}`);
+                                });
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error(`Error getting ready to accept secret fills: ${error}`);
+                });
+        }, 5000);
+    }).catch((error) => {
         console.dir(error, { depth: null });
     });
 }).catch((error) => {
