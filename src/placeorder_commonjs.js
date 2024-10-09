@@ -34,11 +34,11 @@ const sdk = new SDK({
 });
 
 const params = {
-    srcChainId: NetworkEnum.ETHEREUM,
-    dstChainId: NetworkEnum.GNOSIS,
-    srcTokenAddress: '0x6b175474e89094c44da98b954eedeac495271d0f',
-    dstTokenAddress: '0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee',
-    amount: '1000000000000000000000',
+    srcChainId: NetworkEnum.ARBITRUM,
+    dstChainId: NetworkEnum.COINBASE,
+    srcTokenAddress: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
+    dstTokenAddress: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+    amount: '10000000',
     enableEstimate: true,
     walletAddress: makerAddress
 };

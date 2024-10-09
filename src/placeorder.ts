@@ -25,7 +25,7 @@ if (!makerPrivateKey || !makerAddress || !nodeUrl) {
 
 const blockchainProvider = new PrivateKeyProviderConnector(
     makerPrivateKey,
-    await new Web3(nodeUrl) as any
+    new Web3(nodeUrl) as any
 )
 
 const sdk = new SDK({
