@@ -61,6 +61,10 @@ sdk.getQuote(params).then(quote => {
         walletAddress: makerAddress,
         hashLock,
         secretHashes
-    }).then(console.log).catch(console.error);
-}).catch(console.error);
+    }).then(console.log).catch((error) => {
+        console.dir(error, { depth: null });
+    });
+}).catch((error) => {
+    console.dir(error, { depth: null });
+});
 
