@@ -1,5 +1,5 @@
 # Installation
-Dependencies must be installed `pnpm` and *not* `npm`
+Dependencies must be installed `pnpm` or `yarn` and *not* `npm`
 
 # Usage
 The project must be setup like a commonjs project. The design of the library does not work in its current form if you import it as ECM
