@@ -1,14 +1,14 @@
 // use this when there is no `"type": "module"` in your package.json, i.e. you're using commonjs
 
-const { SDK, HashLock, PrivateKeyProviderConnector, NetworkEnum, QuoteParams } = require("@1inch/cross-chain-sdk");
+const { SDK, HashLock, PrivateKeyProviderConnector, NetworkEnum } = require("@1inch/cross-chain-sdk");
 const env = require('dotenv');
 const process = env.config().parsed;
 
 const { Web3 } = require('web3');
-const { InvalidInputError } = require('web3');
 const { solidityPackedKeccak256 } = require('ethers');
 const { randomBytes } = require('ethers');
 
+// TODO write formal bug for this function being inaccessible
 function getRandomBytes32() {
     // for some reason the cross-chain-sdk expects a leading 0x and can't handle a 32 byte long hex string
     return '0x' + Buffer.from(randomBytes(32)).toString('hex');
@@ -33,12 +33,30 @@ const sdk = new SDK({
     blockchainProvider
 });
 
+let srcChainId = NetworkEnum.ARBITRUM;
+let dstChainId = NetworkEnum.COINBASE;
+let srcTokenAddress = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831';
+let dstTokenAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+
+const invert = false;
+
+if (invert) {
+    const temp = srcChainId;
+    srcChainId = dstChainId;
+    dstChainId = temp;
+
+    const tempAddress = srcTokenAddress;
+    srcTokenAddress = dstTokenAddress;
+    dstTokenAddress = tempAddress;
+
+}
+
 const params = {
-    srcChainId: NetworkEnum.ARBITRUM,
-    dstChainId: NetworkEnum.COINBASE,
-    srcTokenAddress: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831',
-    dstTokenAddress: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
-    amount: '10000000',
+    srcChainId,
+    dstChainId,
+    srcTokenAddress,
+    dstTokenAddress,
+    amount: '1000000',
     enableEstimate: true,
     walletAddress: makerAddress
 };
@@ -57,29 +75,37 @@ sdk.getQuote(params).then(quote => {
             )
         );
 
+    console.log("Received quote from 1inch API")
+
     sdk.placeOrder(quote, {
         walletAddress: makerAddress,
         hashLock,
         secretHashes
     }).then(quoteResponse => {
 
-        console.log(`secretHashes: ${JSON.stringify(secretHashes, null, 2)}`);
-
         const orderHash = quoteResponse.orderHash;
 
-        setInterval(() => {
+        console.log(`Order successfully placed`);
+
+        const intervalId = setInterval(() => {
+            console.log(`Polling for fills until order status is set to "executed"...`);
+            sdk.getOrderStatus(orderHash).then(order => {
+                    if (order.status === 'executed') {
+                        console.log(`Order is complete. Exiting.`);
+                        clearInterval(intervalId);
+                    }
+                }
+            ).catch(error =>
+                console.error(`Error: ${JSON.stringify(error, null, 2)}`)
+            );
+            
             sdk.getReadyToAcceptSecretFills(orderHash)
                 .then((fillsObject) => {
-                    console.log(`fills length: ${fillsObject.fills.length}`);
                     if (fillsObject.fills.length > 0) {
-                        // For each secret, call submitSecret
                         fillsObject.fills.forEach(fill => {
-                            console.log(`fill content: ${JSON.stringify(fill, null, 2)}`);
-                            console.log(`Submitting secret ${secretHashes[fill.idx]} for order ${orderHash}`);
-                            sdk.submitSecret(orderHash, secretHashes[fill.idx])
+                            sdk.submitSecret(orderHash, secrets[fill.idx])
                                 .then(() => {
-                                    console.log(`Secret submitted: ${JSON.stringify(secretHashes[fill.idx], null, 2)}`);
-//                                    clearInterval(intervalId);
+                                    console.log(`Fill order found! Secret submitted: ${JSON.stringify(secretHashes[fill.idx], null, 2)}`);
                                 })
                                 .catch((error) => {
                                     console.error(`Error submitting secret: ${JSON.stringify(error, null, 2)}`);
