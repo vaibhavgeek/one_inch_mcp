@@ -17,9 +17,10 @@ function getRandomBytes32() {
 const makerPrivateKey = process?.WALLET_KEY;
 const makerAddress = process?.WALLET_ADDRESS;
 const nodeUrl = process?.RPC_URL_ETHEREUM; // suggested for ethereum https://eth.llamarpc.com
+const devPortalApiKey = process?.DEV_PORTAL_KEY
 
 // Validate environment variables
-if (!makerPrivateKey || !makerAddress || !nodeUrl) {
+if (!makerPrivateKey || !makerAddress || !nodeUrl || !devPortalApiKey) {
     throw new Error("Missing required environment variables. Please check your .env file.");
 }
 
@@ -29,7 +30,7 @@ const blockchainProvider = new PrivateKeyProviderConnector(makerPrivateKey, web3
 
 const sdk = new SDK({
     url: 'https://api.1inch.dev/fusion-plus',
-    authKey: process?.DEV_PORTAL_KEY,
+    authKey: devPortalApiKey,
     blockchainProvider
 });
 
@@ -38,7 +39,7 @@ let dstChainId = NetworkEnum.COINBASE;
 let srcTokenAddress = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831';
 let dstTokenAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
 
-const invert = false;
+const invert = true;
 
 if (invert) {
     const temp = srcChainId;
