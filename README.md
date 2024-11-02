@@ -10,4 +10,4 @@ node index.js
 
 # Integration Notes
 
-PrivateKeyProviderConnector in the Fusion SDK supports BlockchainProviderConnector: https://github.com/1inch/fusion-sdk/blob/bd6bbffffc632602e304ace33dc69c40256d7efa/src/connector/blockchain/private-key-provider.connector.ts#L7-L7
+[PrivateKeyProviderConnector](https://github.com/1inch/fusion-sdk/blob/bd6bbffffc632602e304ace33dc69c40256d7efa/src/connector/blockchain/private-key-provider.connector.ts#L7-L7) in the Fusion SDK supports BlockchainProviderConnector
