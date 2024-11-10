@@ -7,10 +7,10 @@ The project must be setup like a commonjs project. The design of the library doe
 1. Create a `.env` file in the same directory as `index.js` and populate it with the following variables:
 
 ```
-DEV_PORTAL_KEY=<replace_with_developer_portal_api_key>
-WALLET_ADDRESS=<replace_with_wallet_address>
-WALLET_KEY=<replace_with_wallet_private_key>
-RPC_URL_ETHEREUM=<replace_with_rpc_url>
+DEV_PORTAL_KEY=replace_with_developer_portal_api_key
+WALLET_ADDRESS=replace_with_wallet_address
+WALLET_KEY=replace_with_wallet_private_key
+RPC_URL_ETHEREUM=replace_with_rpc_url
 ```
 2. Run the project
 ```
