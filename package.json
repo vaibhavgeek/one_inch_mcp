@@ -9,7 +9,6 @@
   "private": true,
   "dependencies": {
     "@1inch/cross-chain-sdk": "latest",
-    "@1inch/tsconfig": "^1.0.7",
     "dotenv": "^16.4.5",
     "ethers": "^6.13.3",
     "web3": "^4.13.0"
