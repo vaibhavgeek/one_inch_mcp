@@ -5,8 +5,7 @@ const env = require('dotenv');
 const process = env.config().parsed;
 
 const { Web3 } = require('web3');
-const { solidityPackedKeccak256 } = require('ethers');
-const { randomBytes } = require('ethers');
+const { solidityPackedKeccak256, randomBytes, Contract, Wallet } = require('ethers');
 
 // TODO write formal bug for this function being inaccessible
 function getRandomBytes32() {
@@ -38,6 +37,19 @@ let srcChainId = NetworkEnum.ARBITRUM;
 let dstChainId = NetworkEnum.COINBASE;
 let srcTokenAddress = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831';
 let dstTokenAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
+
+const approveABI = [{"constant":false,"inputs":[{"name":"spender","type":"address"},{"name":"amount","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"}];
+
+// Approve tokens for spending
+// Approval is only required once! make sure to add logic to check allowance and approve only if needed
+const tkn = new Contract(srcTokenAddress, approveABI, new Wallet(makerPrivateKey, nodeURL));
+let allowance = await tkn.allowance(makerAddress, '0x111111125421ca6dc452d289314280a0f8842a65')
+await tkn.approve(
+    (2n**256n-1n), // unlimited allowance
+    '0x111111125421ca6dc452d289314280a0f8842a65' // aggregation router v6
+);
+
+
 
 const invert = true;
 
