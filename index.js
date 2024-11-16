@@ -45,8 +45,8 @@ const approveABI = [{"constant":false,"inputs":[{"name":"spender","type":"addres
 const tkn = new Contract(srcTokenAddress, approveABI, new Wallet(makerPrivateKey, nodeURL));
 let allowance = await tkn.allowance(makerAddress, '0x111111125421ca6dc452d289314280a0f8842a65')
 await tkn.approve(
-    (2n**256n-1n), // unlimited allowance
-    '0x111111125421ca6dc452d289314280a0f8842a65' // aggregation router v6
+    '0x111111125421ca6dc452d289314280a0f8842a65', // aggregation router v6
+    (2n**256n-1n) // unlimited allowance
 );
 
 
