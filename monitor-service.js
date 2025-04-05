@@ -64,11 +64,9 @@ function isDaemonRunning() {
 // Start daemon process
 function startDaemon() {
     if (isDaemonRunning()) {
-        console.log('Monitor daemon is already running.');
         return;
     }
 
-    console.log('Starting monitor daemon...');
     
     // Start the daemon process detached from the parent
     const daemon = spawn(process.execPath, [__filename, 'daemon'], {
@@ -82,13 +80,11 @@ function startDaemon() {
     // Save the PID
     fs.writeFileSync(DAEMON_PID_FILE, daemon.pid.toString());
     
-    console.log(`Monitor daemon started with PID: ${daemon.pid}`);
 }
 
 // Stop daemon process
 function stopDaemon() {
     if (!isDaemonRunning()) {
-        console.log('Monitor daemon is not running.');
         return;
     }
     
@@ -96,7 +92,6 @@ function stopDaemon() {
         const pid = parseInt(fs.readFileSync(DAEMON_PID_FILE, 'utf8').trim());
         process.kill(pid);
         fs.unlinkSync(DAEMON_PID_FILE);
-        console.log('Monitor daemon stopped.');
     } catch (error) {
         console.error('Error stopping daemon:', error);
         if (fs.existsSync(DAEMON_PID_FILE)) {
@@ -107,7 +102,6 @@ function stopDaemon() {
 
 // Daemon mode - continuously watch for new orders
 function runDaemon() {
-    console.log('Monitor daemon running...');
     
     // Save PID file if it doesn't exist
     if (!fs.existsSync(DAEMON_PID_FILE)) {

@@ -1,8 +1,8 @@
 // use this when there is no `"type": "module"` in your package.json, i.e. you're using commonjs
 
 const { SDK, HashLock, PrivateKeyProviderConnector, NetworkEnum } = require("@1inch/cross-chain-sdk");
-// const env = require('dotenv');
-// const process = env.config().parsed;
+const env = require('dotenv');
+const process = env.config().parsed;
 
 const { Web3 } = require('web3');
 const { solidityPackedKeccak256, randomBytes, Contract, Wallet, JsonRpcProvider } = require('ethers');
@@ -13,15 +13,15 @@ function getRandomBytes32() {
     return '0x' + Buffer.from(randomBytes(32)).toString('hex');
 }
 
-const makerPrivateKey = process?.WALLET_KEY;
-const makerAddress = process?.WALLET_ADDRESS;
-const nodeUrl = process?.RPC_URL_ETHEREUM || process?.RPC_URL_BASE; // suggested for ethereum https://eth.llamarpc.com
-const devPortalApiKey = process?.DEV_PORTAL_KEY;
+
+const makerPrivateKey = "";
+const makerAddress = "";
+const nodeUrl = "";
+const devPortalApiKey = "";
+
 
 // Validate environment variables
-if (!makerPrivateKey || !makerAddress || !nodeUrl || !devPortalApiKey) {
-    throw new Error("Missing required environment variables. Please check your .env file.");
-}
+
 
 const web3Instance = new Web3(nodeUrl);
 const blockchainProvider = new PrivateKeyProviderConnector(makerPrivateKey, web3Instance);
@@ -95,7 +95,6 @@ async function executeCrossChainSwap({
                 )
             );
 
-        console.log("Received Fusion+ quote from 1inch API");
 
         const quoteResponse = await sdk.placeOrder(quote, {
             walletAddress: makerAddress,
@@ -104,7 +103,6 @@ async function executeCrossChainSwap({
         });
 
         const orderHash = quoteResponse.orderHash;
-        console.log(`Order successfully placed with hash: ${orderHash}`);
 
         // Save order information to the status file
         const statusFile = path.join(__dirname, 'order-status.json');
@@ -137,7 +135,7 @@ async function executeCrossChainSwap({
         return {
             success: true,
             orderHash,
-            message: "The swap will happen in 2-3 minutes, please wait. Order is being processed in the background. The monitor daemon is already running and will automatically process your order. Run 'npm run status' to check order status."
+            message: "The swap will happen in 2-3 minutes, please wait. Order is being processed in the background. The monitor daemon is already running and will automatically process your order."
         };
     } catch (error) {
         console.error("Error in cross-chain swap execution:", error);
