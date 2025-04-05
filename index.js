@@ -1,8 +1,8 @@
 // use this when there is no `"type": "module"` in your package.json, i.e. you're using commonjs
 
 const { SDK, HashLock, PrivateKeyProviderConnector, NetworkEnum } = require("@1inch/cross-chain-sdk");
-const env = require('dotenv');
-const process = env.config().parsed;
+// const env = require('dotenv');
+// const process = env.config().parsed;
 
 const { Web3 } = require('web3');
 const { solidityPackedKeccak256, randomBytes, Contract, Wallet, JsonRpcProvider } = require('ethers');
