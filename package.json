@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "commonjs",
   "scripts": {
-    "start": "node index.js",
+    "start": "node mcpServer.js",
     "prestart": "node monitor-service.js start",
     "status": "node status.js",
     "monitor": "node monitor-service.js",
@@ -15,6 +16,7 @@
   "private": true,
   "dependencies": {
     "@1inch/cross-chain-sdk": "latest",
+    "@modelcontextprotocol/sdk": "latest",
     "dotenv": "^16.4.5",
     "ethers": "^6.13.3",
     "web3": "^4.13.0"

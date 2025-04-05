@@ -144,7 +144,7 @@ function runDaemon() {
                     apiUrl: 'https://api.1inch.dev/fusion-plus',
                     authKey: process.env.DEV_PORTAL_KEY,
                     makerPrivateKey: process.env.WALLET_KEY,
-                    nodeUrl: process.env.RPC_URL_BASE
+                    nodeUrl: process.env.RPC_URL_ETHEREUM || process.env.RPC_URL_BASE
                 }
             });
             
@@ -272,7 +272,7 @@ function startMonitoring(orderHash) {
                 apiUrl: 'https://api.1inch.dev/fusion-plus',
                 authKey: process.env.DEV_PORTAL_KEY,
                 makerPrivateKey: process.env.WALLET_KEY,
-                nodeUrl: process.env.RPC_URL_BASE
+                nodeUrl: process.env.RPC_URL_ETHEREUM || process.env.RPC_URL_BASE
             }
         });
         
@@ -384,7 +384,7 @@ function main() {
     require('dotenv').config();
     
     // Verify environment variables are loaded
-    if (!process.env.WALLET_KEY || !process.env.DEV_PORTAL_KEY || !process.env.RPC_URL_BASE) {
+    if (!process.env.WALLET_KEY || !process.env.DEV_PORTAL_KEY || (!process.env.RPC_URL_ETHEREUM && !process.env.RPC_URL_BASE)) {
         console.error('Error: Required environment variables not found. Please check your .env file.');
         process.exit(1);
     }
