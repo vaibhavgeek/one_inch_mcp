@@ -4,7 +4,13 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "prestart": "node monitor-service.js start",
+    "status": "node status.js",
+    "monitor": "node monitor-service.js",
+    "monitor:start": "node monitor-service.js start",
+    "monitor:stop": "node monitor-service.js stop",
+    "monitor:status": "node monitor-service.js status"
   },
   "private": true,
   "dependencies": {

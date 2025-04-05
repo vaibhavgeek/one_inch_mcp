@@ -15,7 +15,7 @@ function getRandomBytes32() {
 
 const makerPrivateKey = process?.WALLET_KEY;
 const makerAddress = process?.WALLET_ADDRESS;
-const nodeUrl = process?.RPC_URL_ETHEREUM; // suggested for ethereum https://eth.llamarpc.com
+const nodeUrl = process?.RPC_URL_BASE; // suggested for ethereum https://eth.llamarpc.com
 const devPortalApiKey = process?.DEV_PORTAL_KEY;
 
 // Validate environment variables
@@ -32,11 +32,6 @@ const sdk = new SDK({
     blockchainProvider
 });
 
-let srcChainId = NetworkEnum.ARBITRUM;
-let dstChainId = NetworkEnum.COINBASE;
-let srcTokenAddress = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831';
-let dstTokenAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913';
-
 const approveABI = [{
     "constant": false,
     "inputs": [
@@ -50,22 +45,25 @@ const approveABI = [{
     "type": "function"
 }];
 
-(async () => {
-    // Approve tokens for spending.
-    // If you need to approve the tokens before posting an order, this code can be uncommented for first run.
-    // const provider = new JsonRpcProvider(nodeUrl);
-    // const tkn = new Contract(srcTokenAddress, approveABI, new Wallet(makerPrivateKey, provider));
-    // await tkn.approve(
-    //     '0x111111125421ca6dc452d289314280a0f8842a65', // aggregation router v6
-    //     (2n**256n - 1n) // unlimited allowance
-    // );
+// Required for order management
+const { fork } = require('child_process');
+const path = require('path');
+const fs = require('fs');
 
-    const invert = false;
-
+// Function to execute a cross-chain swap
+async function executeCrossChainSwap({
+    srcChainId = 8453, // Default: Base
+    dstChainId = NetworkEnum.ARBITRUM, // Default: Arbitrum
+    srcTokenAddress = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', // Default: USDC on Base
+    dstTokenAddress = '0xaf88d065e77c8cC2239327C5EDb3A432268e5831', // Default: USDC on Arbitrum
+    amount = '100000',
+    invert = false
+}) {
+    // Handle token direction swap if needed
     if (invert) {
-        const temp = srcChainId;
+        const tempChain = srcChainId;
         srcChainId = dstChainId;
-        dstChainId = temp;
+        dstChainId = tempChain;
 
         const tempAddress = srcTokenAddress;
         srcTokenAddress = dstTokenAddress;
@@ -77,12 +75,13 @@ const approveABI = [{
         dstChainId,
         srcTokenAddress,
         dstTokenAddress,
-        amount: '1000000',
+        amount,
         enableEstimate: true,
         walletAddress: makerAddress
     };
 
-    sdk.getQuote(params).then(quote => {
+    try {
+        const quote = await sdk.getQuote(params);
         const secretsCount = quote.getPreset().secretsCount;
 
         const secrets = Array.from({ length: secretsCount }).map(() => getRandomBytes32());
@@ -98,66 +97,77 @@ const approveABI = [{
 
         console.log("Received Fusion+ quote from 1inch API");
 
-        sdk.placeOrder(quote, {
+        const quoteResponse = await sdk.placeOrder(quote, {
             walletAddress: makerAddress,
             hashLock,
             secretHashes
-        }).then(quoteResponse => {
-
-            const orderHash = quoteResponse.orderHash;
-
-            console.log(`Order successfully placed`);
-
-            const intervalId = setInterval(() => {
-                console.log(`Polling for fills until order status is set to "executed"...`);
-                sdk.getOrderStatus(orderHash).then(order => {
-                        if (order.status === 'executed') {
-                            console.log(`Order is complete. Exiting.`);
-                            clearInterval(intervalId);
-                        }
-                    }
-                ).catch(error =>
-                    console.error(`Error: ${JSON.stringify(error, null, 2)}`)
-                );
-
-                sdk.getReadyToAcceptSecretFills(orderHash)
-                    .then((fillsObject) => {
-                        if (fillsObject.fills.length > 0) {
-                            fillsObject.fills.forEach(fill => {
-                                sdk.submitSecret(orderHash, secrets[fill.idx])
-                                    .then(() => {
-                                        console.log(`Fill order found! Secret submitted: ${JSON.stringify(secretHashes[fill.idx], null, 2)}`);
-                                    })
-                                    .catch((error) => {
-                                        console.error(`Error submitting secret: ${JSON.stringify(error, null, 2)}`);
-                                    });
-                            });
-                        }
-                    })
-                    .catch((error) => {
-                        if (error.response) {
-                            // The request was made and the server responded with a status code
-                            // that falls out of the range of 2xx
-                            console.error('Error getting ready to accept secret fills:', {
-                                status: error.response.status,
-                                statusText: error.response.statusText,
-                                data: error.response.data
-                            });
-                        } else if (error.request) {
-                            // The request was made but no response was received
-                            console.error('No response received:', error.request);
-                        } else {
-                            // Something happened in setting up the request that triggered an Error
-                            console.error('Error', error.message);
-                        }
-                    });
-            }, 5000);
-        }).catch((error) => {
-            console.dir(error, { depth: null });
         });
-    }).catch((error) => {
-        console.dir(error, { depth: null });
-    });
-})().catch(error => {
-    console.error("Error in main execution:", error);
-});
+
+        const orderHash = quoteResponse.orderHash;
+        console.log(`Order successfully placed with hash: ${orderHash}`);
+
+        // Save order information to the status file
+        const statusFile = path.join(__dirname, 'order-status.json');
+        let statusData = { orders: [] };
+        
+        // Read existing status file if it exists
+        if (fs.existsSync(statusFile)) {
+            try {
+                statusData = JSON.parse(fs.readFileSync(statusFile, 'utf8'));
+            } catch (error) {
+                console.error('Error reading status file:', error);
+            }
+        }
+        
+        // Add the new order to the status data
+        statusData.orders.push({
+            orderHash,
+            secrets,
+            secretHashes,
+            startTime: Date.now(),
+            lastUpdated: Date.now(),
+            status: 'pending',
+            isMonitoring: false
+        });
+        
+        // Save the updated status data
+        fs.writeFileSync(statusFile, JSON.stringify(statusData, null, 2));
+        
+        // Return immediately with a message
+        return {
+            success: true,
+            orderHash,
+            message: "The swap will happen in 2-3 minutes, please wait. Order is being processed in the background. The monitor daemon is already running and will automatically process your order. Run 'npm run status' to check order status."
+        };
+    } catch (error) {
+        console.error("Error in cross-chain swap execution:", error);
+        return {
+            success: false,
+            error: error.message || "Unknown error occurred"
+        };
+    }
+}
+
+// Example usage
+(async () => {
+    try {
+        // Approve tokens for spending if needed.
+        // If you need to approve the tokens before posting an order, this code can be uncommented for first run.
+        // const provider = new JsonRpcProvider(nodeUrl);
+        // const tkn = new Contract(srcTokenAddress, approveABI, new Wallet(makerPrivateKey, provider));
+        // await tkn.approve(
+        //     '0x111111125421ca6dc452d289314280a0f8842a65', // aggregation router v6
+        //     (2n**256n - 1n) // unlimited allowance
+        // );
+
+        const result = await executeCrossChainSwap({
+            // You can override default parameters here if needed
+            // amount: '200000',
+            // invert: true,
+        });
+
+        console.log(result.message);
+    } catch (error) {
+        console.error("Error in main execution:", error);
+    }
+})();
