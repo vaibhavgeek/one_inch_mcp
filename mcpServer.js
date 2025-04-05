@@ -190,16 +190,22 @@ server.resource(
  *
  * Description:
  *   Fetches the current value of various protocols from the 1inch Portfolio API.
- *   The only required parameter is the chain ID (default is 1).
+ *   Parameters include chain ID and addresses.
  */
 server.tool(
   "portfolio-protocols-value",
   {
-    chainId: z.number().default(1)
+    chainId: z.number().default(1),
+    addresses: z.string().optional(),
+    use_cache: z.boolean().optional().default(false)
   },
   async (params) => {
     try {
-      const result = await makePortfolioApiRequest('/overview/protocols/current_value', params.chainId);
+      const queryParams = {
+        addresses: params.addresses,
+        use_cache: params.use_cache.toString()
+      };
+      const result = await makePortfolioApiRequest('/overview/protocols/current_value', params.chainId, queryParams);
       return {
         content: [{ 
           type: "text", 
@@ -220,23 +226,26 @@ server.tool(
  *
  * Description:
  *   Retrieves detailed information about ERC-20 tokens from the 1inch Portfolio API.
- *   Parameters:
- *     - chainId: The blockchain identifier (default is 1).
- *     - closed: Boolean to indicate if closed positions should be included.
- *     - closedThreshold: Threshold value for considering a position closed.
+ *   Parameters include chain ID, addresses, timerange, closed positions flag, and threshold.
  */
 server.tool(
   "portfolio-tokens-details",
   {
     chainId: z.number().default(1),
+    addresses: z.string().optional(),
+    timerange: z.enum(['1day', '1week', '1month', '1year', '3years']).optional().default('1day'),
     closed: z.boolean().default(true),
-    closedThreshold: z.number().default(1)
+    closed_threshold: z.number().default(1),
+    use_cache: z.boolean().optional().default(false)
   },
   async (params) => {
     try {
       const queryParams = {
+        addresses: params.addresses,
+        timerange: params.timerange,
         closed: params.closed.toString(),
-        closed_threshold: params.closedThreshold.toString()
+        closed_threshold: params.closed_threshold.toString(),
+        use_cache: params.use_cache.toString()
       };
       const result = await makePortfolioApiRequest('/overview/erc20/details', params.chainId, queryParams);
       return {
@@ -259,16 +268,22 @@ server.tool(
  *
  * Description:
  *   Fetches the general current portfolio value from the 1inch Portfolio API.
- *   Only requires the chain ID as a parameter (default is 1).
+ *   Parameters include chain ID, addresses and cache flag.
  */
 server.tool(
   "portfolio-general-value",
   {
-    chainId: z.number().default(1)
+    chainId: z.number().default(1),
+    addresses: z.string().optional(),
+    use_cache: z.boolean().optional().default(false)
   },
   async (params) => {
     try {
-      const result = await makePortfolioApiRequest('/general/current_value', params.chainId);
+      const queryParams = {
+        addresses: params.addresses,
+        use_cache: params.use_cache.toString()
+      };
+      const result = await makePortfolioApiRequest('/general/current_value', params.chainId, queryParams);
       return {
         content: [{ 
           type: "text", 
@@ -289,16 +304,24 @@ server.tool(
  *
  * Description:
  *   Retrieves chart data for the general portfolio value from the 1inch Portfolio API.
- *   The chain ID (default is 1) must be provided as a parameter.
+ *   Parameters include chain ID, addresses, timerange and cache flag.
  */
 server.tool(
   "portfolio-value-chart",
   {
-    chainId: z.number().default(1)
+    chainId: z.number().default(1),
+    addresses: z.string().optional(),
+    timerange: z.enum(['1day', '1week', '1month', '1year', '3years']).optional().default('1month'),
+    use_cache: z.boolean().optional().default(false)
   },
   async (params) => {
     try {
-      const result = await makePortfolioApiRequest('/general/value_chart', params.chainId);
+      const queryParams = {
+        addresses: params.addresses,
+        timerange: params.timerange,
+        use_cache: params.use_cache.toString()
+      };
+      const result = await makePortfolioApiRequest('/general/value_chart', params.chainId, queryParams);
       return {
         content: [{ 
           type: "text", 
