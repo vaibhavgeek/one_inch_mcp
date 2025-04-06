@@ -3,7 +3,7 @@
 A tool for executing cross-chain token swaps using 1inch Fusion+ and Model Context Protocol (MCP).
 
 ## Demo Video 
-Add youtube video here. 
+[![Video Title](https://img.youtube.com/vi/6_0x3pWLBhw/maxresdefault.jpg)](https://www.youtube.com/watch?v=6_0x3pWLBhw)
 
 ## Overview
 
